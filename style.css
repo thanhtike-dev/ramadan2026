@@ -1,0 +1,148 @@
+:root {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+}
+
+body {
+  margin: 0;
+  background: #0b0f14;
+  color: #e8eef6;
+}
+
+header {
+  padding: 18px 16px;
+  border-bottom: 1px solid #1f2a37;
+}
+
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 16px;
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: #111827;
+  border: 1px solid #1f2a37;
+  border-radius: 14px;
+  padding: 14px;
+  flex: 1;
+  min-width: 260px;
+}
+
+.muted {
+  color: #9aa4b2;
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.big {
+  font-size: 28px;
+  font-weight: 800;
+  margin-top: 6px;
+}
+
+.pill {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid #243244;
+  border-radius: 999px;
+  background: #0f172a;
+}
+
+select {
+  background: #0f172a;
+  border: 1px solid #243244;
+  color: #e8eef6;
+  padding: 10px 12px;
+  border-radius: 10px;
+}
+
+button {
+  cursor: pointer;
+  border: none;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+button.secondary {
+  background: #0f172a;
+  border: 1px solid #243244;
+  color: #e8eef6;
+}
+
+button.primary {
+  background: #2563eb;
+  color: white;
+}
+
+button.install {
+  background: #22c55e;
+  color: #052e16;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  overflow: hidden;
+  border-radius: 14px;
+  border: 1px solid #1f2a37;
+}
+
+th,
+td {
+  padding: 10px 10px;
+  border-bottom: 1px solid #1f2a37;
+  text-align: left;
+}
+
+th {
+  background: #0f172a;
+  color: #cbd5e1;
+  font-weight: 700;
+  font-size: 13px;
+}
+
+tr.today {
+  outline: 2px solid #22c55e;
+  outline-offset: -2px;
+  background: rgba(34, 197, 94, 0.08);
+}
+
+.grid {
+  margin-top: 12px;
+}
+
+.footer {
+  padding: 18px 0;
+  color: #9aa4b2;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.badge {
+  font-size: 12px;
+  padding: 3px 8px;
+  border: 1px solid #243244;
+  border-radius: 999px;
+  background: #0f172a;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: flex-start;
+}
+
+code {
+  color: #cbd5e1;
+}

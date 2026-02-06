@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="my">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ရမဇာန် အချိန်ဇယား (မြန်မာ)</title>
+  <meta name="description" content="မြန်မာနိုင်ငံ ရမဇာန် အချိန်ဇယား (ဆူဟူးရ်ပြီးချိန် & အီဖ်တာရ်)" />
+
+  <!-- PWA -->
+  <link rel="manifest" href="manifest.webmanifest">
+  <meta name="theme-color" content="#0b0f14">
+
+  <!-- iOS support -->
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="./style.css">
+</head>
+
+<body>
+  <header>
+    <div class="wrap">
+      <div class="topbar">
+        <div>
+          <div style="font-weight:900; font-size:18px;">ရမဇာန် အချိန်ဇယား (မြန်မာ)</div>
+          <div class="muted">အချိန်ဇုန်: Asia/Yangon (MMT)</div>
+
+          <!-- Install button (Android/Desktop only) -->
+          <button id="installBtn" class="install" style="display:none; margin-top:10px;">
+            📲 App Install လုပ်မယ်
+          </button>
+
+          <!-- iOS hint for install -->
+          <div id="iosInstallHint" class="muted" style="margin-top:8px; display:none;">
+            iPhone/iPad: Safari မှာ ဖွင့်ပြီး <b>Share</b> → <b>Add to Home Screen</b> နဲ့ Install လုပ်နိုင်ပါတယ်။
+          </div>
+        </div>
+
+        <div class="pill">
+          <span class="muted">မိနစ်ချိန်ညှိ</span>
+          <select id="adjust" aria-label="Adjustment">
+            <option value="-2">-2 မိနစ်</option>
+            <option value="-1">-1 မိနစ်</option>
+            <option value="0" selected>0 မိနစ်</option>
+            <option value="1">+1 မိနစ်</option>
+            <option value="2">+2 မိနစ်</option>
+          </select>
+          <button class="secondary" id="reset">ပြန်စီမယ်</button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <div class="row">
+      <div class="card">
+        <div class="muted">ယနေ့</div>
+        <div id="todayLabel" class="big">—</div>
+        <div class="muted" id="dayLabel">—</div>
+        <div style="margin-top:10px; display:flex; gap:8px; flex-wrap:wrap;">
+          <span class="badge" id="nextEvent">နောက်တစ်ခု: —</span>
+          <span class="badge" id="countdown">—</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="muted">ဆူဟူးရ်ပြီးချိန်</div>
+        <div class="big" id="suhoor">—</div>
+        <div class="muted">အများအားဖြင့် ဖဇ်ရ် အချိန်နှင့်တူသည်</div>
+      </div>
+
+      <div class="card">
+        <div class="muted">အီဖ်တာရ်</div>
+        <div class="big" id="iftar">—</div>
+        <div class="muted">မာဂရစ်ဘ် အချိန်</div>
+      </div>
+    </div>
+
+    <div class="card grid" style="margin-top:12px;">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
+        <div>
+          <div style="font-weight:800;">အချိန်ဇယား (အပြည့်အစုံ)</div>
+          <div class="muted">Myanmar only • Data ကို <code>app.js</code> ထဲမှာ ပြင်နိုင်ပါတယ်</div>
+        </div>
+
+        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+          <button id="icsBtn" class="secondary">iPhone Calendar ထဲ ထည့်မယ် (.ics)</button>
+          <button id="icsBothBtn" class="secondary">အီဖ်တာရ် + ဆူဟူးရ် (.ics)</button>
+          <button id="printBtn" class="secondary">ပရင့်ထုတ်မယ်</button>
+        </div>
+      </div>
+
+      <!-- iOS calendar hint -->
+      <div id="iosHint" class="muted" style="margin-top:8px; display:none;">
+        iPhone / iPad အသုံးပြုသူများအတွက် — ဖိုင်ကို download လုပ်ပြီးနောက် <b>.ics</b> ဖိုင်ကိုဖွင့်ပါ။ ထို့နောက် <b>Add All</b> ကိုနှိပ်ပြီး Calendar ထဲသို့ ထည့်ပါ။
+      </div>
+
+      <div style="margin-top:12px;">
+        <table>
+          <thead>
+            <tr>
+              <th>ရမဇာန်နေ့</th>
+              <th>ရက်စွဲ</th>
+              <th>ဆူဟူးရ်ပြီးချိန်</th>
+              <th>အီဖ်တာရ်</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="footer">
+      မှတ်ချက် — မစ်စ်ဂျစ်/ဒေသအလိုက် မိနစ်အနည်းငယ် ကွာခြားနိုင်သည်။ လိုအပ်ပါက “မိနစ်ချိန်ညှိ” ဖြင့် ပြင်ဆင်နိုင်ပါသည်။
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+
+  <!-- Service worker registration -->
+  <script>
+    if ("serviceWorker" in navigator) {
+      window.addEventListener("load", () => {
+        navigator.serviceWorker.register("./sw.js");
+      });
+    }
+  </script>
+
+  <!-- Install app button logic (Android/Desktop) -->
+  <script>
+    let deferredPrompt = null;
+    const installBtn = document.getElementById("installBtn");
+
+    window.addEventListener("beforeinstallprompt", (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = "inline-block";
+    });
+
+    installBtn.addEventListener("click", async () => {
+      if (!deferredPrompt) return;
+      deferredPrompt.prompt();
+      await deferredPrompt.userChoice;
+      deferredPrompt = null;
+      installBtn.style.display = "none";
+    });
+
+    window.addEventListener("appinstalled", () => {
+      installBtn.style.display = "none";
+      deferredPrompt = null;
+    });
+
+    // iOS install hint (because no beforeinstallprompt)
+    (function showIosInstallHint() {
+      const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+        (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1);
+      const hint = document.getElementById("iosInstallHint");
+      if (isIOS && hint) hint.style.display = "block";
+    })();
+  </script>
+</body>
+</html>
