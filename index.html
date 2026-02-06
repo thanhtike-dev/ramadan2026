@@ -14,7 +14,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <link rel="apple-touch-icon" href="icons/icon-192.png">
-  <link rel="stylesheet" href="./style.css">
+  <link rel="stylesheet" href="./style.css?v=3">
 </head>
 
 <body>
@@ -120,9 +120,16 @@
   <!-- Service worker registration -->
   <script>
     if ("serviceWorker" in navigator) {
-      window.addEventListener("load", () => {
-        navigator.serviceWorker.register("./sw.js");
-      });
+      // Don't register service worker in local/dev environments
+      const isLocalhost = location.hostname === "localhost" || location.hostname === "127.0.0.1";
+      const isFileProtocol = location.protocol === "file:";
+      if (isLocalhost || isFileProtocol) {
+        console.log("Service worker not registered in development environment.");
+      } else {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker.register("./sw.js");
+        });
+      }
     }
   </script>
 
