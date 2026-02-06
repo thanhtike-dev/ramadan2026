@@ -1,4 +1,4 @@
-const CACHE_NAME = "ramadan-mm-v4";
+const CACHE_NAME = "ramadan-mm-v5";
 
 const ASSETS = [
   "./",
