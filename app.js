@@ -6,9 +6,9 @@ const TZ = "Asia/Yangon";
 // Time format: HH:MM (24h)
 const RAMADAN = [
   // From your image (first 10 are readable)
-  { day: 1, date: "2026-02-19", suhoorEnd: "05:14", iftar: "18:12" },
-  { day: 2, date: "2026-02-20", suhoorEnd: "05:14", iftar: "18:12" },
-  { day: 3, date: "2026-02-21", suhoorEnd: "05:13", iftar: "18:12" },
+  { day: 1, date: "2026-02-7", suhoorEnd: "05:14", iftar: "18:12" },
+  { day: 2, date: "2026-02-8", suhoorEnd: "05:14", iftar: "18:12" },
+  { day: 3, date: "2026-02-9", suhoorEnd: "05:13", iftar: "18:12" },
   { day: 4, date: "2026-02-22", suhoorEnd: "05:13", iftar: "18:13" },
   { day: 5, date: "2026-02-23", suhoorEnd: "05:12", iftar: "18:13" },
   { day: 6, date: "2026-02-24", suhoorEnd: "05:12", iftar: "18:13" },
