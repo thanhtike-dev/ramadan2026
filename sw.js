@@ -1,8 +1,9 @@
-const CACHE_NAME = "ramadan-mm-v1";
+const CACHE_NAME = "ramadan-mm-v3";
 
 const ASSETS = [
   "./",
   "./index.html",
+  "./style.css",
   "./app.js",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
