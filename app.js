@@ -1,25 +1,181 @@
-// Myanmar timezone
-const TZ = "Asia/Yangon";
+// ==============================
+// Location-based Ramadan timetable (Aladhan)
+// ==============================
 
-// ✅ Put your 30 days here.
-// Date format: YYYY-MM-DD
-// Time format: HH:MM (24h)
-const RAMADAN = [
-  // From your image (first 10 are readable)
-  { day: 1, date: "2026-02-07", suhoorEnd: "05:14", iftar: "18:12" },
-  { day: 2, date: "2026-02-08", suhoorEnd: "05:14", iftar: "18:12" },
-  { day: 3, date: "2026-02-09", suhoorEnd: "05:13", iftar: "18:12" },
-  { day: 4, date: "2026-02-10", suhoorEnd: "05:13", iftar: "18:13" },
-  { day: 5, date: "2026-02-23", suhoorEnd: "05:12", iftar: "18:13" },
-  { day: 6, date: "2026-02-24", suhoorEnd: "05:12", iftar: "18:13" },
-  { day: 7, date: "2026-02-25", suhoorEnd: "05:11", iftar: "18:14" },
-  { day: 8, date: "2026-02-26", suhoorEnd: "05:11", iftar: "18:14" },
-  { day: 9, date: "2026-02-27", suhoorEnd: "05:10", iftar: "18:14" },
-  { day: 10, date: "2026-02-28", suhoorEnd: "05:09", iftar: "18:14" },
+// Default timezone is auto-detected; can be overridden by city preset.
+let APP_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
 
-  // TODO: Fill day 11–30 from your timetable
-  // { day: 11, date: "2026-03-01", suhoorEnd: "05:09", iftar: "18:15" },
-];
+// Runtime dataset (replaces hardcoded RAMADAN)
+let RAMADAN = [];
+
+// Aladhan config
+const ALADHAN_BASE = "https://api.aladhan.com/v1";
+const CALC_METHOD = 1; // 1 = Karachi (often closer to Myanmar local timetables)
+
+// City presets (small starter set; users worldwide should prefer Auto GPS)
+const CITY_PRESETS = {
+  yangon: { name: "Yangon", lat: 16.7870, lon: 96.1656, tz: "Asia/Yangon" },
+  mandalay: { name: "Mandalay", lat: 21.9588, lon: 96.0891, tz: "Asia/Yangon" },
+  naypyidaw: { name: "Naypyidaw", lat: 19.7633, lon: 96.0785, tz: "Asia/Yangon" },
+  taunggyi: { name: "Taunggyi", lat: 20.7892, lon: 97.0378, tz: "Asia/Yangon" },
+};
+
+const LOC_KEY = "ramadan_loc_v1";
+
+// Optional: force Ramadan Day 1 to start from a specific Gregorian date for Myanmar.
+// Useful when local moon-sighting differs by 1 day from calculated Hijri conversion.
+const RAMADAN_START_OVERRIDES_MYANMAR_BY_YEAR = {
+  2026: "2026-02-19",
+};
+
+function isInMyanmar(lat, lon) {
+  // Rough bounding box for Myanmar
+  return lat >= 9 && lat <= 29 && lon >= 92 && lon <= 102;
+}
+
+function applyRamadanStartOverride(days, year, lat, lon) {
+  const start = RAMADAN_START_OVERRIDES_MYANMAR_BY_YEAR[Number(year)];
+  if (!start) return days;
+  if (!isInMyanmar(lat, lon)) return days;
+
+  // Keep days starting from the override date and take first 30
+  const filtered = days.filter(d => d.date >= start);
+  return filtered.slice(0, 30);
+}
+
+function setText(id, value) {
+  const node = document.getElementById(id);
+  if (node) node.textContent = value;
+}
+
+function stripTz(timeStr) {
+  // Aladhan returns e.g. "05:12 (MMT)"; keep "05:12"
+  return (timeStr || "").split(" ")[0].trim();
+}
+
+function cacheKey({ year, lat, lon, tz, method }) {
+  return `ramadan_cache_v5_${year}_${lat.toFixed(4)}_${lon.toFixed(4)}_${tz}_${method}`;
+}
+
+async function fetchCalendarMonth({ year, month, lat, lon, tz, method }) {
+  const url = new URL(`${ALADHAN_BASE}/calendar`);
+  url.searchParams.set("latitude", String(lat));
+  url.searchParams.set("longitude", String(lon));
+  url.searchParams.set("method", String(method));
+  url.searchParams.set("month", String(month));
+  url.searchParams.set("year", String(year));
+  url.searchParams.set("timezonestring", tz);
+
+  const res = await fetch(url.toString(), { cache: "no-store" });
+  const json = await res.json();
+  if (!json || json.code !== 200 || !Array.isArray(json.data)) {
+    throw new Error("Unexpected Aladhan response");
+  }
+  return json.data;
+}
+
+async function fetchRamadanByLatLon({ year, lat, lon, tz, method = CALC_METHOD }) {
+  // Ramadan can span across Gregorian months; fetch a safe set then filter Hijri month=9.
+  const monthsToTry = [12, 1, 2, 3, 4, 5];
+  const key = cacheKey({ year, lat, lon, tz, method });
+
+  // Cache for 7 days
+  const cached = localStorage.getItem(key);
+  if (cached) {
+    try {
+      const parsed = JSON.parse(cached);
+      if (parsed?.savedAt && (Date.now() - parsed.savedAt) < 7 * 24 * 60 * 60 * 1000) {
+        return parsed.data;
+      }
+    } catch {}
+  }
+
+  let days = [];
+
+  for (const month of monthsToTry) {
+    const cal = await fetchCalendarMonth({ year, month, lat, lon, tz, method });
+
+    for (const item of cal) {
+      const hijriMonth = Number(item?.date?.hijri?.month?.number);
+      if (hijriMonth !== 9) continue;
+
+      // Aladhan gregorian date is "DD-MM-YYYY"
+      const ddmmyyyy = item?.date?.gregorian?.date;
+      if (!ddmmyyyy) continue;
+      const [dd, mm, yyyy] = ddmmyyyy.split("-");
+      const iso = `${yyyy}-${mm}-${dd}`;
+
+      const fajr = stripTz(item?.timings?.Fajr);
+      const maghrib = stripTz(item?.timings?.Maghrib);
+
+      days.push({
+        date: iso,
+        suhoorEnd: addMinutesToHHMM(fajr, -3),
+        iftar: addMinutesToHHMM(maghrib, +3),
+      });
+    }
+  }
+
+  // Sort, optionally align Day 1 to local calendar, then assign day numbers
+  days.sort((a, b) => a.date.localeCompare(b.date));
+  days = applyRamadanStartOverride(days, year, lat, lon);
+  days = days.map((x, i) => ({ day: i + 1, ...x }));
+
+  localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data: days }));
+  return days;
+}
+
+function saveLoc(loc) {
+  localStorage.setItem(LOC_KEY, JSON.stringify(loc));
+}
+
+function loadLoc() {
+  try {
+    return JSON.parse(localStorage.getItem(LOC_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+function getGPSLocation() {
+  return new Promise((resolve, reject) => {
+    if (!navigator.geolocation) return reject(new Error("Geolocation not supported"));
+    navigator.geolocation.getCurrentPosition(
+      (pos) => resolve({ lat: pos.coords.latitude, lon: pos.coords.longitude }),
+      (err) => reject(err),
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  });
+}
+
+async function loadRamadanDataForMode({ mode, cityKey, year }) {
+  // Determine tz/label/coords
+  if (mode === "city") {
+    const preset = CITY_PRESETS[cityKey] || CITY_PRESETS.yangon;
+    APP_TZ = preset.tz;
+    setText("tzLabel", APP_TZ);
+    setText("locLabel", preset.name);
+
+    RAMADAN = await fetchRamadanByLatLon({ year, lat: preset.lat, lon: preset.lon, tz: APP_TZ, method: CALC_METHOD });
+    saveLoc({ mode: "city", cityKey });
+    return;
+  }
+
+  // Auto GPS
+  APP_TZ = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+  setText("tzLabel", APP_TZ);
+  setText("locLabel", "Getting GPS…");
+
+  const { lat, lon } = await getGPSLocation();
+  setText("locLabel", `${lat.toFixed(3)}, ${lon.toFixed(3)}`);
+
+  RAMADAN = await fetchRamadanByLatLon({ year, lat, lon, tz: APP_TZ, method: CALC_METHOD });
+  saveLoc({ mode: "auto", lat, lon, tz: APP_TZ });
+}
+
+function getUserTZ() {
+  return Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+}
 
 const el = (id) => document.getElementById(id);
 const pad2 = (n) => String(n).padStart(2, "0");
@@ -57,9 +213,7 @@ function todayYMDinTZ(tz) {
   return `${y}-${m}-${d}`;
 }
 
-// Countdown date creation
-// Note: If user opens from outside Myanmar timezone, countdown may be slightly off.
-// Times display is still correct for Myanmar.
+// Countdown uses the device's local time. Display/today-highlighting uses APP_TZ.
 function makeLocalDate(ymd, hm) {
   const [Y, M, D] = ymd.split("-").map(Number);
   const [h, m] = hm.split(":").map(Number);
@@ -70,7 +224,7 @@ function renderTable(adjust) {
   const tbody = el("tbody");
   tbody.innerHTML = "";
 
-  const todayYMD = todayYMDinTZ(TZ);
+  const todayYMD = todayYMDinTZ(APP_TZ);
 
   RAMADAN.forEach(row => {
     const tr = document.createElement("tr");
@@ -90,13 +244,13 @@ function renderTable(adjust) {
 }
 
 function findTodayRow() {
-  const todayYMD = todayYMDinTZ(TZ);
+  const todayYMD = todayYMDinTZ(APP_TZ);
   return RAMADAN.find(r => r.date === todayYMD) || null;
 }
 
 function setTopCards(adjust) {
   const now = new Date();
-  el("todayLabel").textContent = formatDateInTZ(now, TZ);
+  el("todayLabel").textContent = formatDateInTZ(now, APP_TZ);
 
   const row = findTodayRow();
   if (!row) {
@@ -175,22 +329,6 @@ function nowUTCStamp() {
   return `${Y}${M}${D}T${h}${m}${s}Z`;
 }
 
-// Minimal timezone definition for Asia/Yangon (no DST, UTC+06:30)
-function buildVTIMEZONE_AsiaYangon() {
-  return [
-    "BEGIN:VTIMEZONE",
-    "TZID:Asia/Yangon",
-    "X-LIC-LOCATION:Asia/Yangon",
-    "BEGIN:STANDARD",
-    "TZOFFSETFROM:+0630",
-    "TZOFFSETTO:+0630",
-    "TZNAME:MMT",
-    "DTSTART:19700101T000000",
-    "END:STANDARD",
-    "END:VTIMEZONE"
-  ].join("\r\n");
-}
-
 function buildEvent({ title, description, ymd, timeHHMM, alarmMinutes, uidSuffix }) {
   const dtstamp = nowUTCStamp();
   const dtstart = ymdToICSDateTime(ymd, timeHHMM);
@@ -208,8 +346,8 @@ function buildEvent({ title, description, ymd, timeHHMM, alarmMinutes, uidSuffix
     "BEGIN:VEVENT",
     `UID:${uid}`,
     `DTSTAMP:${dtstamp}`,
-    `DTSTART;TZID=Asia/Yangon:${dtstart}`,
-    `DTEND;TZID=Asia/Yangon:${dtend}`,
+    `DTSTART:${dtstart}`,
+    `DTEND:${dtend}`,
     `SUMMARY:${title}`,
     `DESCRIPTION:${description}`,
     "BEGIN:VALARM",
@@ -228,13 +366,12 @@ function downloadICS({ includeSuhoor, includeIftar, adjustMinutes = 0, alarmMinu
   lines.push("PRODID:-//Ramadan Myanmar//Timetable//EN");
   lines.push("CALSCALE:GREGORIAN");
   lines.push("METHOD:PUBLISH");
-  lines.push(buildVTIMEZONE_AsiaYangon());
 
   RAMADAN.forEach((row) => {
     const su = addMinutesToHHMM(row.suhoorEnd, adjustMinutes);
     const ift = addMinutesToHHMM(row.iftar, adjustMinutes);
 
-    const dateLabel = `ရမဇာန်နေ့ ${row.day} (${row.date}) — Timezone: Asia/Yangon`;
+    const dateLabel = `ရမဇာန်နေ့ ${row.day} (${row.date}) — Timezone: ${APP_TZ}`;
 
     if (includeSuhoor) {
       lines.push(buildEvent({
@@ -326,7 +463,84 @@ function init() {
     if (isIOS && hint) hint.style.display = "block";
   })();
 
-  apply();
+  // Location controls (added in index.html)
+  const locationMode = document.getElementById("locationMode");
+  const citySelect = document.getElementById("citySelect");
+  const useLocationBtn = document.getElementById("useLocation");
+
+  // Hydrate saved location choice
+  const savedLoc = loadLoc();
+  if (savedLoc?.mode === "city" && locationMode) locationMode.value = "city";
+  if (savedLoc?.mode === "city" && savedLoc?.cityKey && citySelect) citySelect.value = savedLoc.cityKey;
+
+  function syncLocationUI() {
+    const mode = locationMode?.value || "auto";
+    if (!citySelect || !useLocationBtn) return;
+
+    if (mode === "city") {
+      citySelect.style.display = "";
+      useLocationBtn.style.display = "none";
+    } else {
+      citySelect.style.display = "none";
+      useLocationBtn.style.display = "";
+    }
+  }
+
+  async function refreshDataAndRender() {
+    const mode = locationMode?.value || "auto";
+    const cityKey = citySelect?.value || "yangon";
+
+    // Default: current Gregorian year (works for most use; you can add a year selector later)
+    const year = new Date().getFullYear();
+
+    // Disable controls while loading
+    if (useLocationBtn) useLocationBtn.disabled = true;
+    if (locationMode) locationMode.disabled = true;
+    if (citySelect) citySelect.disabled = true;
+
+    try {
+      await loadRamadanDataForMode({ mode, cityKey, year });
+
+      // Re-render with current adjustment
+      const adjust = parseInt(el("adjust").value, 10) || 0;
+      renderTable(adjust);
+      setTopCards(adjust);
+    } catch (err) {
+      console.error(err);
+      alert("Failed to load timetable for your location. Please check internet/GPS permissions and try again.");
+    } finally {
+      if (useLocationBtn) useLocationBtn.disabled = false;
+      if (locationMode) locationMode.disabled = false;
+      if (citySelect) citySelect.disabled = false;
+    }
+  }
+
+  if (locationMode) {
+    locationMode.addEventListener("change", () => {
+      syncLocationUI();
+      if (locationMode.value === "city") refreshDataAndRender();
+      else {
+        setText("tzLabel", getUserTZ());
+        setText("locLabel", "Tap 📍");
+      }
+    });
+  }
+
+  if (citySelect) citySelect.addEventListener("change", refreshDataAndRender);
+  if (useLocationBtn) useLocationBtn.addEventListener("click", refreshDataAndRender);
+
+  syncLocationUI();
+
+  // Initial data load
+  (async () => {
+    // If saved city mode, load immediately; otherwise show hint until user taps 📍
+    if (savedLoc?.mode === "city") {
+      await refreshDataAndRender();
+    } else {
+      setText("tzLabel", getUserTZ());
+      setText("locLabel", "Tap 📍");
+    }
+  })();
 
   // Update countdown every second
   setInterval(() => {

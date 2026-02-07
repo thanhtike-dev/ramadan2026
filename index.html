@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ရမဇာန် အချိန်ဇယား (မြန်မာ)</title>
-  <meta name="description" content="မြန်မာနိုင်ငံ ရမဇာန် အချိန်ဇယား (ဆူဟူးရ်ပြီးချိန် & အီဖ်တာရ်)" />
+  <title>ရမဇာန် အချိန်ဇယား (Location-based)</title>
+  <meta name="description" content="Location-based ရမဇာန် အချိန်ဇယား (ဆူဟူးရ်ပြီးချိန် & အီဖ်တာရ်)" />
 
   <!-- PWA -->
   <link rel="manifest" href="manifest.webmanifest">
@@ -22,8 +22,8 @@
     <div class="wrap">
       <div class="topbar">
         <div>
-          <div style="font-weight:900; font-size:18px;">ရမဇာန် အချိန်ဇယား (မြန်မာ)</div>
-          <div class="muted">အချိန်ဇုန်: Asia/Yangon (MMT)</div>
+          <div style="font-weight:900; font-size:18px;">ရမဇာန် အချိန်ဇယား (Location-based)</div>
+          <div class="muted">အချိန်ဇုန်: <span id="tzLabel">Auto</span></div>
 
           <!-- Install button (Android/Desktop only) -->
           <button id="installBtn" class="install" style="display:none; margin-top:10px;">
@@ -46,6 +46,21 @@
             <option value="2">+2 မိနစ်</option>
           </select>
           <button class="secondary" id="reset">ပြန်စီမယ်</button>
+        </div>
+        <div class="pill">
+          <span class="muted">တည်နေရာ</span>
+          <select id="locationMode" aria-label="Location mode">
+            <option value="auto" selected>Auto (GPS)</option>
+            <option value="city">မြို့ရွေးမယ်</option>
+          </select>
+          <select id="citySelect" aria-label="City" style="display:none;">
+            <option value="yangon">Yangon</option>
+            <option value="mandalay">Mandalay</option>
+            <option value="naypyidaw">Naypyidaw</option>
+            <option value="taunggyi">Taunggyi</option>
+          </select>
+          <button class="secondary" id="useLocation" style="display:none;">📍 အသုံးပြုမယ်</button>
+          <span class="muted" id="locLabel" style="margin-left:6px;">—</span>
         </div>
       </div>
     </div>
@@ -80,7 +95,7 @@
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
         <div>
           <div style="font-weight:800;">အချိန်ဇယား (အပြည့်အစုံ)</div>
-          <div class="muted">Myanmar only • Data ကို <code>app.js</code> ထဲမှာ ပြင်နိုင်ပါတယ်</div>
+          <div class="muted">Location-based • Auto (GPS) သို့မဟုတ် မြို့ရွေးပြီး အသုံးပြုနိုင်ပါတယ်</div>
         </div>
 
         <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -111,11 +126,11 @@
     </div>
 
     <div class="footer">
-      မှတ်ချက် — မစ်စ်ဂျစ်/ဒေသအလိုက် မိနစ်အနည်းငယ် ကွာခြားနိုင်သည်။ လိုအပ်ပါက “မိနစ်ချိန်ညှိ” ဖြင့် ပြင်ဆင်နိုင်ပါသည်။
+      မှတ်ချက် — တည်နေရာ (lat/lon) အလိုက် အချိန်များကွာခြားပါသည်။ GPS သုံးမရပါက မြို့ရွေးပါ။ လိုအပ်ပါက “မိနစ်ချိန်ညှိ” ဖြင့် ပြင်ဆင်နိုင်ပါသည်။
     </div>
   </main>
 
-  <script src="app.js?v=1"></script>
+  <script src="app.js?v=8"></script>
 
   <!-- Service worker registration -->
   <script>
