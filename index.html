@@ -130,7 +130,7 @@
     </div>
   </main>
 
-  <script src="app.js?v=9"></script>
+  <script src="app.js?v=10"></script>
 
   <!-- Service worker registration -->
   <script>
@@ -142,7 +142,7 @@
         console.log("Service worker not registered in development environment.");
       } else {
         window.addEventListener("load", () => {
-          navigator.serviceWorker.register("./sw.js");
+          navigator.serviceWorker.register("./sw.js?v=9");
         });
       }
     }

@@ -1,10 +1,10 @@
-const CACHE_NAME = "ramadan-mm-v14";
+const CACHE_NAME = "ramadan-mm-v15";
 
 const ASSETS = [
   "./",
   "./index.html",
   "./style.css?v=7",
-  "./app.js?v=9",
+  "./app.js?v=10",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
@@ -28,6 +28,14 @@ self.addEventListener("activate", (event) => {
 
 // Cache-first (fast + offline)
 self.addEventListener("fetch", (event) => {
+  const reqUrl = new URL(event.request.url);
+
+  // ✅ DO NOT intercept cross-origin requests (Aladhan API, CDNs)
+  if (reqUrl.origin !== self.location.origin) return;
+
+  // only handle GET
+  if (event.request.method !== "GET") return;
+
   const req = event.request;
 
   event.respondWith(
