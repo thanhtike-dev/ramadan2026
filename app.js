@@ -15,9 +15,22 @@ const CALC_METHOD = 1; // 1 = Karachi (often closer to Myanmar local timetables)
 // City presets (small starter set; users worldwide should prefer Auto GPS)
 const CITY_PRESETS = {
   yangon: { name: "Yangon", lat: 16.7870, lon: 96.1656, tz: "Asia/Yangon" },
+  bago: { name: "Bago", lat: 17.3369, lon: 96.4797, tz: "Asia/Yangon" },
+  pathein: { name: "Pathein", lat: 16.7704, lon: 94.7321, tz: "Asia/Yangon" },
   mandalay: { name: "Mandalay", lat: 21.9588, lon: 96.0891, tz: "Asia/Yangon" },
   naypyidaw: { name: "Naypyidaw", lat: 19.7633, lon: 96.0785, tz: "Asia/Yangon" },
   taunggyi: { name: "Taunggyi", lat: 20.7892, lon: 97.0378, tz: "Asia/Yangon" },
+  pyay: { name: "Pyay", lat: 18.8249, lon: 95.2222, tz: "Asia/Yangon" },
+  monywa: { name: "Monywa", lat: 22.1086, lon: 95.1331, tz: "Asia/Yangon" },
+  lashio: { name: "Lashio", lat: 22.9359, lon: 97.7498, tz: "Asia/Yangon" },
+  magway: { name: "Magway", lat: 20.1496, lon: 94.9329, tz: "Asia/Yangon" },
+  mawlamyine: { name: "Mawlamyine", lat: 16.4849, lon: 97.6260, tz: "Asia/Yangon" },
+  myitkyina: { name: "Myitkyina", lat: 25.3837, lon: 97.3961, tz: "Asia/Yangon" },
+  sagaing: { name: "Sagaing", lat: 21.8787, lon: 95.9780, tz: "Asia/Yangon" },
+  sittwe: { name: "Sittwe", lat: 20.1462, lon: 92.8986, tz: "Asia/Yangon" },
+  hpaan: { name: "Hpa-An", lat: 16.8891, lon: 97.6348, tz: "Asia/Yangon" },
+  dawei: { name: "Dawei", lat: 14.0822, lon: 98.1915, tz: "Asia/Yangon" },
+  myeik: { name: "Myeik", lat: 12.4395, lon: 98.6003, tz: "Asia/Yangon" },
 };
 
 const LOC_KEY = "ramadan_loc_v1";
