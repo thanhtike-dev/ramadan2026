@@ -22,21 +22,27 @@
     <div class="wrap">
       <div class="topbar">
         <div>
-          <div style="font-weight:900; font-size:18px;">ရမဇာန် အချိန်ဇယား (Location-based)</div>
+          <div style="font-weight:900; font-size:20px;">ရမဇာန် အချိန်ဇယား</div>
           <div class="muted">အချိန်ဇုန်: <span id="tzLabel">Auto</span></div>
 
-          <!-- iOS hint for install -->
-          <div id="iosInstallHint" class="muted" style="margin-top:8px; display:none;">
-            iPhone/iPad: Safari မှာ ဖွင့်ပြီး <b>Share</b> → <b>Add to Home Screen</b> နဲ့ Install လုပ်နိုင်ပါတယ်။
-          </div>
         </div>
+      </div>
+    </div>
+  </header>
 
-        <div class="pill">
-          <span class="muted">တည်နေရာ</span>
-          <select id="locationMode" aria-label="Location mode">
-            <option value="auto" selected>Auto (GPS)</option>
-            <option value="city">မြို့ရွေးမယ်</option>
-          </select>
+  <main class="wrap">
+    <div class="card simple-card">
+      <div class="section-title">တည်နေရာကိုရွေးပါ</div>
+      <div class="muted">GPS သုံးနိုင်ရင် “လက်ရှိတည်နေရာ” ကိုနှိပ်ပါ။ မရရင် မြို့ရွေးပါ။</div>
+
+      <div class="simple-controls">
+        <select id="locationMode" aria-label="Location mode">
+          <option value="auto" selected>Auto (GPS)</option>
+          <option value="city">မြို့ရွေးမယ်</option>
+        </select>
+
+        <div id="cityField">
+          <label class="field-label" for="citySelect">မြို့</label>
           <select id="citySelect" aria-label="City" style="display:none;">
             <option value="yangon">Yangon</option>
             <option value="bago">Bago</option>
@@ -56,14 +62,13 @@
             <option value="dawei">Dawei</option>
             <option value="myeik">Myeik</option>
           </select>
-          <button class="secondary" id="useLocation" style="display:none;">📍 အသုံးပြုမယ်</button>
-          <span class="muted" id="locLabel" style="margin-left:6px;">—</span>
         </div>
+
+        <button class="primary" id="useLocation" style="display:none;">📍 လက်ရှိတည်နေရာကို အသုံးပြုမယ်</button>
+        <div class="muted" id="locLabel">—</div>
       </div>
     </div>
-  </header>
 
-  <main class="wrap">
     <div class="row">
       <div class="card">
         <div class="muted">ယနေ့</div>
@@ -89,18 +94,17 @@
     </div>
 
     <div class="card grid" style="margin-top:12px;">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; flex-wrap:wrap;">
-        <div>
-          <div style="font-weight:800;">အချိန်ဇယား (အပြည့်အစုံ)</div>
-          <div class="muted">Location-based • Auto (GPS) သို့မဟုတ် မြို့ရွေးပြီး အသုံးပြုနိုင်ပါတယ်</div>
-        </div>
+      <div class="section-title">အချိန်ဇယား (အပြည့်အစုံ)</div>
+      <div class="muted">Location-based • Auto (GPS) သို့မဟုတ် မြို့ရွေးပြီး အသုံးပြုနိုင်ပါတယ်</div>
 
-        <div style="display:flex; gap:8px; flex-wrap:wrap;">
+      <details class="advanced">
+        <summary>အပိုဆောင်း လုပ်ဆောင်ချက်များ</summary>
+        <div class="advanced-actions">
           <button id="icsBtn" class="secondary">iPhone Calendar ထဲ ထည့်မယ် (.ics)</button>
           <button id="icsBothBtn" class="secondary">အီဖ်တာရ် + ဆူဟူးရ် (.ics)</button>
           <button id="printBtn" class="secondary">ပရင့်ထုတ်မယ်</button>
         </div>
-      </div>
+      </details>
 
       <!-- iOS calendar hint -->
       <div id="iosHint" class="muted" style="margin-top:8px; display:none;">
@@ -127,6 +131,10 @@
       <button id="installBtn" class="install footer-install" style="display:none; margin-bottom:10px;">
         📲 App Install လုပ်မယ်
       </button>
+      <!-- iOS hint for install -->
+      <div id="iosInstallHint" class="muted" style="margin-top:8px; display:none;">
+        iPhone/iPad: Safari မှာ ဖွင့်ပြီး <b>Share</b> → <b>Add to Home Screen</b> နဲ့ Install လုပ်နိုင်ပါတယ်။
+      </div>
       <div>မှတ်ချက် — တည်နေရာ (lat/lon) အလိုက် အချိန်များကွာခြားပါသည်။ GPS သုံးမရပါက မြို့ရွေးပါ။</div>
     </div>
   </main>

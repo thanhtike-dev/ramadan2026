@@ -460,6 +460,7 @@ function init() {
   // Location controls (added in index.html)
   const locationMode = document.getElementById("locationMode");
   const citySelect = document.getElementById("citySelect");
+  const cityField = document.getElementById("cityField");
   const useLocationBtn = document.getElementById("useLocation");
 
   // Hydrate saved location choice
@@ -472,10 +473,12 @@ function init() {
     if (!citySelect || !useLocationBtn) return;
 
     if (mode === "city") {
+      if (cityField) cityField.style.display = "";
       citySelect.style.display = "";
       useLocationBtn.style.display = "none";
     } else {
       citySelect.style.display = "none";
+      if (cityField) cityField.style.display = "none";
       useLocationBtn.style.display = "";
     }
   }
@@ -524,7 +527,7 @@ function init() {
       if (locationMode.value === "city") refreshDataAndRender();
       else {
         setText("tzLabel", getUserTZ());
-        setText("locLabel", "Tap 📍");
+        setText("locLabel", "latitude/longitude");
       }
     });
   }
@@ -550,7 +553,7 @@ function init() {
       await refreshDataAndRender();
     } else {
       setText("tzLabel", getUserTZ());
-      setText("locLabel", "Tap 📍");
+      setText("locLabel", "latitude/longitude");
     }
   })();
 

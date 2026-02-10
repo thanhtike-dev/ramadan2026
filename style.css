@@ -4,11 +4,12 @@
   --panel: rgba(2, 6, 23, 0.55);
   --panel2: rgba(15, 23, 42, 0.9);
   --border: rgba(148, 163, 184, 0.14);
-  --muted: #94a3b8;
+  --muted: #b9c4d6;
   --text: #e8eef6;
   --green: #22c55e;
   --cyan: #38bdf8;
   --blue: #2563eb;
+  --focus: #fbbf24;
 }
 
 * { box-sizing: border-box; }
@@ -16,6 +17,7 @@
 body {
   margin: 0;
   color: var(--text);
+  font-size: 16px;
   background:
     radial-gradient(1200px 600px at 20% -10%, #1e293b 0%, transparent 60%),
     radial-gradient(800px 500px at 80% 10%, #0f766e 0%, transparent 55%),
@@ -34,15 +36,16 @@ header {
 .wrap {
   max-width: 1020px;
   margin: 0 auto;
-  padding: 16px;
+  padding: 18px;
 }
 
 .topbar {
   display: flex;
   justify-content: space-between;
-  gap: 12px;
+  gap: 14px;
   flex-wrap: wrap;
   align-items: flex-start;
+  flex-direction: column;
 }
 
 h1 {
@@ -69,6 +72,7 @@ h1 {
   flex-wrap: wrap;
   align-items: stretch;
   margin-top: 12px;
+  flex-direction: column;
 }
 
 .card {
@@ -85,12 +89,12 @@ h1 {
 
 .muted {
   color: var(--muted);
-  font-size: 13px;
-  line-height: 1.45;
+  font-size: 15px;
+  line-height: 1.55;
 }
 
 .big {
-  font-size: 32px;
+  font-size: 34px;
   font-weight: 900;
   letter-spacing: -0.02em;
   margin-top: 8px;
@@ -98,11 +102,11 @@ h1 {
 
 .pill {
   display: inline-flex;
-  gap: 8px;
+  gap: 10px;
   align-items: center;
-  padding: 8px 10px;
+  padding: 12px 14px;
   border: 1px solid var(--border);
-  border-radius: 999px;
+  border-radius: 16px;
   background: rgba(15, 23, 42, 0.7);
   backdrop-filter: blur(6px);
 }
@@ -119,18 +123,22 @@ select {
   background: rgba(15, 23, 42, 0.7);
   border: 1px solid var(--border);
   color: var(--text);
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 12px;
   outline: none;
+  font-size: 16px;
+  min-height: 44px;
 }
 
 button {
   cursor: pointer;
   border: none;
-  padding: 10px 12px;
+  padding: 12px 14px;
   border-radius: 12px;
   font-weight: 800;
   transition: transform 0.15s ease, filter 0.15s ease;
+  font-size: 16px;
+  min-height: 44px;
 }
 
 button:hover { transform: translateY(-1px); filter: brightness(1.05); }
@@ -203,18 +211,18 @@ table {
 }
 
 th, td {
-  padding: 10px 10px;
+  padding: 12px 12px;
   border-bottom: 1px solid rgba(148, 163, 184, 0.10);
   text-align: left;
   vertical-align: middle;
-  font-size: 13.5px;
+  font-size: 15px;
 }
 
 th {
   background: rgba(15, 23, 42, 0.85);
   color: #cbd5e1;
   font-weight: 900;
-  font-size: 12px;
+  font-size: 12.5px;
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
@@ -228,10 +236,10 @@ tr.today {
 }
 
 .footer {
-  padding: 18px 0 28px;
+  padding: 20px 0 32px;
   color: var(--muted);
-  font-size: 12px;
-  line-height: 1.5;
+  font-size: 14px;
+  line-height: 1.6;
 }
 
 .footer-install {
@@ -243,12 +251,84 @@ tr.today {
 .note {
   margin-top: 10px;
   color: var(--muted);
-  font-size: 12.5px;
+  font-size: 14px;
 }
 
 .hint {
   color: #cbd5e1;
-  font-size: 12.5px;
+  font-size: 14px;
+}
+
+.simple-card {
+  margin-top: 8px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.simple-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.field-label {
+  font-weight: 800;
+  font-size: 15px;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+
+.advanced {
+  margin-top: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 10px 12px;
+  background: rgba(15, 23, 42, 0.5);
+}
+
+.advanced summary {
+  cursor: pointer;
+  font-weight: 800;
+  font-size: 16px;
+  list-style: none;
+}
+
+.advanced summary::-webkit-details-marker {
+  display: none;
+}
+
+.advanced summary::after {
+  content: "▼";
+  float: right;
+  opacity: 0.7;
+}
+
+.advanced[open] summary::after {
+  content: "▲";
+}
+
+.advanced-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+select:focus-visible,
+button:focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (max-width: 720px) {
+  .pill {
+    flex-wrap: wrap;
+  }
 }
 
 .mono {
