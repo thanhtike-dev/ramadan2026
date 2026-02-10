@@ -25,28 +25,12 @@
           <div style="font-weight:900; font-size:18px;">ရမဇာန် အချိန်ဇယား (Location-based)</div>
           <div class="muted">အချိန်ဇုန်: <span id="tzLabel">Auto</span></div>
 
-          <!-- Install button (Android/Desktop only) -->
-          <button id="installBtn" class="install" style="display:none; margin-top:10px;">
-            📲 App Install လုပ်မယ်
-          </button>
-
           <!-- iOS hint for install -->
           <div id="iosInstallHint" class="muted" style="margin-top:8px; display:none;">
             iPhone/iPad: Safari မှာ ဖွင့်ပြီး <b>Share</b> → <b>Add to Home Screen</b> နဲ့ Install လုပ်နိုင်ပါတယ်။
           </div>
         </div>
 
-        <div class="pill">
-          <span class="muted">မိနစ်ချိန်ညှိ</span>
-          <select id="adjust" aria-label="Adjustment">
-            <option value="-2">-2 မိနစ်</option>
-            <option value="-1">-1 မိနစ်</option>
-            <option value="0" selected>0 မိနစ်</option>
-            <option value="1">+1 မိနစ်</option>
-            <option value="2">+2 မိနစ်</option>
-          </select>
-          <button class="secondary" id="reset">ပြန်စီမယ်</button>
-        </div>
         <div class="pill">
           <span class="muted">တည်နေရာ</span>
           <select id="locationMode" aria-label="Location mode">
@@ -126,7 +110,11 @@
     </div>
 
     <div class="footer">
-      မှတ်ချက် — တည်နေရာ (lat/lon) အလိုက် အချိန်များကွာခြားပါသည်။ GPS သုံးမရပါက မြို့ရွေးပါ။ လိုအပ်ပါက “မိနစ်ချိန်ညှိ” ဖြင့် ပြင်ဆင်နိုင်ပါသည်။
+      <!-- Install button (Android/Desktop only) -->
+      <button id="installBtn" class="install footer-install" style="display:none; margin-bottom:10px;">
+        📲 App Install လုပ်မယ်
+      </button>
+      <div>မှတ်ချက် — တည်နေရာ (lat/lon) အလိုက် အချိန်များကွာခြားပါသည်။ GPS သုံးမရပါက မြို့ရွေးပါ။</div>
     </div>
   </main>
 

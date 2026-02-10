@@ -153,6 +153,31 @@ button.install {
   box-shadow: 0 10px 22px rgba(34, 197, 94, 0.35);
 }
 
+button.loading {
+  opacity: 0.8;
+  cursor: wait;
+  position: relative;
+  padding-right: 36px;
+}
+
+button.loading::after {
+  content: "";
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  width: 14px;
+  height: 14px;
+  margin-top: -7px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  border-top-color: var(--text);
+  animation: spin 0.9s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
 .badge {
   font-size: 16px;
   padding: 4px 10px;
@@ -207,6 +232,12 @@ tr.today {
   color: var(--muted);
   font-size: 12px;
   line-height: 1.5;
+}
+
+.footer-install {
+  display: block;
+  width: 100%;
+  text-align: center;
 }
 
 .note {

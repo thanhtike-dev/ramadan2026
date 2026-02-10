@@ -220,7 +220,7 @@ function makeLocalDate(ymd, hm) {
   return new Date(Y, M - 1, D, h, m, 0, 0);
 }
 
-function renderTable(adjust) {
+function renderTable() {
   const tbody = el("tbody");
   tbody.innerHTML = "";
 
@@ -230,8 +230,8 @@ function renderTable(adjust) {
     const tr = document.createElement("tr");
     if (row.date === todayYMD) tr.classList.add("today");
 
-    const su = addMinutesToHHMM(row.suhoorEnd, adjust);
-    const ift = addMinutesToHHMM(row.iftar, adjust);
+    const su = row.suhoorEnd;
+    const ift = row.iftar;
 
     tr.innerHTML = `
       <td>${row.day}</td>
@@ -248,7 +248,7 @@ function findTodayRow() {
   return RAMADAN.find(r => r.date === todayYMD) || null;
 }
 
-function setTopCards(adjust) {
+function setTopCards() {
   const now = new Date();
   el("todayLabel").textContent = formatDateInTZ(now, APP_TZ);
 
@@ -264,8 +264,8 @@ function setTopCards(adjust) {
 
   el("dayLabel").textContent = `ရမဇာန်နေ့ ${row.day} • ရက်စွဲ ${row.date}`;
 
-  const su = addMinutesToHHMM(row.suhoorEnd, adjust);
-  const ift = addMinutesToHHMM(row.iftar, adjust);
+  const su = row.suhoorEnd;
+  const ift = row.iftar;
   el("suhoor").textContent = su;
   el("iftar").textContent = ift;
 
@@ -286,7 +286,7 @@ function setTopCards(adjust) {
     const tomorrow = RAMADAN[idx + 1];
     if (tomorrow) {
       nextName = "မနက်ဖြန် ဆူဟူးရ်ပြီးချိန်";
-      nextTime = makeLocalDate(tomorrow.date, addMinutesToHHMM(tomorrow.suhoorEnd, adjust));
+      nextTime = makeLocalDate(tomorrow.date, tomorrow.suhoorEnd);
     } else {
       nextName = "—";
     }
@@ -359,7 +359,7 @@ function buildEvent({ title, description, ymd, timeHHMM, alarmMinutes, uidSuffix
   ].join("\r\n");
 }
 
-function downloadICS({ includeSuhoor, includeIftar, adjustMinutes = 0, alarmMinutes = 10 }) {
+function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
   const lines = [];
   lines.push("BEGIN:VCALENDAR");
   lines.push("VERSION:2.0");
@@ -368,8 +368,8 @@ function downloadICS({ includeSuhoor, includeIftar, adjustMinutes = 0, alarmMinu
   lines.push("METHOD:PUBLISH");
 
   RAMADAN.forEach((row) => {
-    const su = addMinutesToHHMM(row.suhoorEnd, adjustMinutes);
-    const ift = addMinutesToHHMM(row.iftar, adjustMinutes);
+    const su = row.suhoorEnd;
+    const ift = row.iftar;
 
     const dateLabel = `ရမဇာန်နေ့ ${row.day} (${row.date}) — Timezone: ${APP_TZ}`;
 
@@ -417,23 +417,6 @@ function downloadICS({ includeSuhoor, includeIftar, adjustMinutes = 0, alarmMinu
    ========= */
 
 function init() {
-  // Load saved adjustment
-  const saved = localStorage.getItem("adjustMinutes");
-  if (saved !== null) el("adjust").value = saved;
-
-  const apply = () => {
-    const adjust = parseInt(el("adjust").value, 10) || 0;
-    localStorage.setItem("adjustMinutes", String(adjust));
-    renderTable(adjust);
-    setTopCards(adjust);
-  };
-
-  el("adjust").addEventListener("change", apply);
-  el("reset").addEventListener("click", () => {
-    el("adjust").value = "0";
-    apply();
-  });
-
   el("printBtn").addEventListener("click", () => window.print());
 
   // ICS buttons
@@ -442,16 +425,14 @@ function init() {
 
   if (icsBtn) {
     icsBtn.addEventListener("click", () => {
-      const adjust = parseInt(document.getElementById("adjust").value, 10) || 0;
       // 10 minutes before by default
-      downloadICS({ includeIftar: true, includeSuhoor: false, adjustMinutes: adjust, alarmMinutes: 10 });
+      downloadICS({ includeIftar: true, includeSuhoor: false, alarmMinutes: 10 });
     });
   }
 
   if (icsBothBtn) {
     icsBothBtn.addEventListener("click", () => {
-      const adjust = parseInt(document.getElementById("adjust").value, 10) || 0;
-      downloadICS({ includeIftar: true, includeSuhoor: true, adjustMinutes: adjust, alarmMinutes: 10 });
+      downloadICS({ includeIftar: true, includeSuhoor: true, alarmMinutes: 10 });
     });
   }
 
@@ -486,6 +467,17 @@ function init() {
     }
   }
 
+  function setUseLocationLoading(isLoading) {
+    if (!useLocationBtn) return;
+    if (!useLocationBtn.dataset.label) {
+      useLocationBtn.dataset.label = useLocationBtn.textContent || "📍 အသုံးပြုမယ်";
+    }
+    useLocationBtn.disabled = !!isLoading;
+    useLocationBtn.classList.toggle("loading", !!isLoading);
+    useLocationBtn.setAttribute("aria-busy", isLoading ? "true" : "false");
+    useLocationBtn.textContent = isLoading ? "Loading..." : useLocationBtn.dataset.label;
+  }
+
   async function refreshDataAndRender() {
     const mode = locationMode?.value || "auto";
     const cityKey = citySelect?.value || "yangon";
@@ -501,10 +493,8 @@ function init() {
     try {
       await loadRamadanDataForMode({ mode, cityKey, year });
 
-      // Re-render with current adjustment
-      const adjust = parseInt(el("adjust").value, 10) || 0;
-      renderTable(adjust);
-      setTopCards(adjust);
+      renderTable();
+      setTopCards();
     } catch (err) {
       console.error(err);
       alert("Failed to load timetable for your location. Please check internet/GPS permissions and try again.");
@@ -527,7 +517,16 @@ function init() {
   }
 
   if (citySelect) citySelect.addEventListener("change", refreshDataAndRender);
-  if (useLocationBtn) useLocationBtn.addEventListener("click", refreshDataAndRender);
+  if (useLocationBtn) {
+    useLocationBtn.addEventListener("click", async () => {
+      setUseLocationLoading(true);
+      try {
+        await refreshDataAndRender();
+      } finally {
+        setUseLocationLoading(false);
+      }
+    });
+  }
 
   syncLocationUI();
 
@@ -544,8 +543,7 @@ function init() {
 
   // Update countdown every second
   setInterval(() => {
-    const adjust = parseInt(el("adjust").value, 10) || 0;
-    setTopCards(adjust);
+    setTopCards();
   }, 1000);
 }
 
