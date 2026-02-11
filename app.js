@@ -91,7 +91,7 @@ function stripTz(timeStr) {
 }
 
 function cacheKey({ year, lat, lon, tz, method }) {
-  return `ramadan_cache_v6_${year}_${lat.toFixed(4)}_${lon.toFixed(4)}_${tz}_${method}`;
+  return `ramadan_cache_v7_${year}_${lat.toFixed(4)}_${lon.toFixed(4)}_${tz}_${method}`;
 }
 
 async function fetchCalendarMonth({ year, month, lat, lon, tz, method }) {
@@ -476,7 +476,7 @@ function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
 
 function init() {
   // Clear old caches on update
-  const CACHE_VERSION = "v3";
+  const CACHE_VERSION = "v4";
   const lastVersion = localStorage.getItem("appCacheVersion");
   if (lastVersion !== CACHE_VERSION) {
     localStorage.clear();

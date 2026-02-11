@@ -425,7 +425,7 @@ html[data-theme="dark"] .theme-toggle .theme-knob {
   flex: 1;
 }
 
-@media (min-width: 400px) {
+@media (min-width: 768px) {
   .advanced-actions {
     flex-direction: row;
   }
