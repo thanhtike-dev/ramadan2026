@@ -2,9 +2,9 @@ const CACHE_NAME = "ramadan-mm-v18";
 
 const ASSETS = [
   "./",
-  "./index.html",
-  "./style.css?v=8",
-  "./app.js?v=12",
+  "./index.html?v=1",
+  "./style.css?v=9",
+  "./app.js?v=13",
   "./manifest.webmanifest",
   "./icons/icon-192.png",
   "./icons/icon-512.png"
