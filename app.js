@@ -476,7 +476,7 @@ function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
 
 function init() {
   // Clear old caches on update
-  const CACHE_VERSION = "v2";
+  const CACHE_VERSION = "v3";
   const lastVersion = localStorage.getItem("appCacheVersion");
   if (lastVersion !== CACHE_VERSION) {
     localStorage.clear();
