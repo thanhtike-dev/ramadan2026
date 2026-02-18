@@ -225,6 +225,14 @@ function addMinutesToHHMM(hhmm, mins) {
   return `${pad2(Math.floor(t / 60))}:${pad2(t % 60)}`;
 }
 
+function formatTime12(hhmm) {
+  const [hRaw, mRaw] = (hhmm || "").split(":").map(Number);
+  if (!Number.isFinite(hRaw) || !Number.isFinite(mRaw)) return hhmm || "--:--";
+  const suffix = hRaw >= 12 ? "PM" : "AM";
+  const h12 = hRaw % 12 || 12;
+  return `${h12}:${pad2(mRaw)} ${suffix}`;
+}
+
 // For display: show date in Myanmar locale, in Asia/Yangon
 function formatDateInTZ(date, tz) {
   return new Intl.DateTimeFormat("my-MM", {
@@ -274,8 +282,8 @@ function renderTable() {
     tr.innerHTML = `
       <td>${row.day}</td>
       <td>${row.date}</td>
-      <td>${su}</td>
-      <td>${ift}</td>
+      <td>${formatTime12(su)}</td>
+      <td>${formatTime12(ift)}</td>
     `;
     tbody.appendChild(tr);
   });
@@ -302,11 +310,12 @@ function setTopCards() {
 
   const row = findTodayRow();
   if (!row) {
-    if (el("dayLabel")) el("dayLabel").textContent = "ယနေ့ရက်စွဲသည် ထည့်ထားသော ရမဇာန်ရက်စွဲများထဲတွင် မပါဝင်ပါ။";
+    if (el("dayLabel")) el("dayLabel").textContent = "ယနေ့ရက်စွဲသည် ရမဇာန်ရက်စွဲများထဲတွင် မပါဝင်ပါ။";
     if (el("suhoor")) el("suhoor").textContent = "--:--";
     if (el("iftar")) el("iftar").textContent = "--:--";
-    if (el("nextEvent")) el("nextEvent").textContent = "--:--";
+    if (el("nextEvent")) el("nextEvent").textContent = "";
     if (el("countdown")) el("countdown").textContent = "--:--";
+    if (el("countdown-wrap")) el("countdown-wrap").style.display = "none";
     return;
   }
 
@@ -314,8 +323,8 @@ function setTopCards() {
 
   const su = row.suhoorEnd;
   const ift = row.iftar;
-  if (el("suhoor")) el("suhoor").textContent = su;
-  if (el("iftar")) el("iftar").textContent = ift;
+  if (el("suhoor")) el("suhoor").textContent = formatTime12(su);
+  if (el("iftar")) el("iftar").textContent = formatTime12(ift);
 
   const suDate = makeLocalDate(row.date, su);
   const iftDate = makeLocalDate(row.date, ift);
@@ -354,6 +363,7 @@ function setTopCards() {
   const ss = s % 60;
 
   el("countdown").textContent = `${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
+  el("countdown-wrap").style.display = "flex";
 }
 
 /* =========================
@@ -423,7 +433,7 @@ function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
 
     if (includeSuhoor) {
       lines.push(buildEvent({
-        title: `ဝါပိတ်ချိန် • ${su}`,
+        title: `ဝါပိတ်ချိန် • ${formatTime12(su)}`,
         description: dateLabel,
         ymd: row.date,
         timeHHMM: su,
@@ -434,7 +444,7 @@ function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
 
     if (includeIftar) {
       lines.push(buildEvent({
-        title: `ဝါဖြေချိန် • ${ift}`,
+        title: `ဝါဖြေချိန် • ${formatTime12(ift)}`,
         description: dateLabel,
         ymd: row.date,
         timeHHMM: ift,
@@ -472,8 +482,6 @@ function init() {
     localStorage.clear();
     localStorage.setItem("appCacheVersion", CACHE_VERSION);
   }
-  el("printBtn").addEventListener("click", () => window.print());
-
   // ICS buttons
   const icsBtn = document.getElementById("icsBtn");
   const icsBothBtn = document.getElementById("icsBothBtn");
