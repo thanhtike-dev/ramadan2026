@@ -273,24 +273,24 @@ function findTodayRow() {
 
 function setTopCards() {
   const now = new Date();
-  el("todayLabel").textContent = formatDateInTZ(now, APP_TZ);
+  if (el("todayLabel")) el("todayLabel").textContent = formatDateInTZ(now, APP_TZ);
 
   const row = findTodayRow();
   if (!row) {
-    el("dayLabel").textContent = "ယနေ့ရက်စွဲသည် ထည့်ထားသော ရမဇာန်ရက်စွဲများထဲတွင် မပါဝင်ပါ။";
-    el("suhoor").textContent = "--:--";
-    el("iftar").textContent = "--:--";
-    el("nextEvent").textContent = "--:--";
-    el("countdown").textContent = "--:--";
+    if (el("dayLabel")) el("dayLabel").textContent = "ယနေ့ရက်စွဲသည် ထည့်ထားသော ရမဇာန်ရက်စွဲများထဲတွင် မပါဝင်ပါ။";
+    if (el("suhoor")) el("suhoor").textContent = "--:--";
+    if (el("iftar")) el("iftar").textContent = "--:--";
+    if (el("nextEvent")) el("nextEvent").textContent = "--:--";
+    if (el("countdown")) el("countdown").textContent = "--:--";
     return;
   }
 
-  el("dayLabel").textContent = `ရမဇာန်နေ့ ${row.day}`;
+  if (el("dayLabel")) el("dayLabel").textContent = `ရမဇာန်နေ့ ${row.day}`;
 
   const su = row.suhoorEnd;
   const ift = row.iftar;
-  el("suhoor").textContent = su;
-  el("iftar").textContent = ift;
+  if (el("suhoor")) el("suhoor").textContent = su;
+  if (el("iftar")) el("iftar").textContent = ift;
 
   const suDate = makeLocalDate(row.date, su);
   const iftDate = makeLocalDate(row.date, ift);
@@ -299,16 +299,16 @@ function setTopCards() {
   let nextTime = null;
 
   if (now < suDate) {
-    nextName = "၀ါပိတ်ရန်";
+    nextName = "ဝါပိတ်ရန်";
     nextTime = suDate;
   } else if (now < iftDate) {
-    nextName = "၀ါဖြေရန်";
+    nextName = "ဝါဖြေရန်";
     nextTime = iftDate;
   } else {
     const idx = RAMADAN.findIndex(r => r.date === row.date);
     const tomorrow = RAMADAN[idx + 1];
     if (tomorrow) {
-      nextName = "မနက်ဖြန် ၀ါပိတ်ရန်";
+      nextName = "မနက်ဖြန် ဝါပိတ်ရန်";
       nextTime = makeLocalDate(tomorrow.date, tomorrow.suhoorEnd);
     } else {
       nextName = "—";
@@ -398,7 +398,7 @@ function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
 
     if (includeSuhoor) {
       lines.push(buildEvent({
-        title: `၀ါပိတ်ချိန် • ${su}`,
+        title: `ဝါပိတ်ချိန် • ${su}`,
         description: dateLabel,
         ymd: row.date,
         timeHHMM: su,
@@ -409,7 +409,7 @@ function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
 
     if (includeIftar) {
       lines.push(buildEvent({
-        title: `၀ါဖြေချိန် • ${ift}`,
+        title: `ဝါဖြေချိန် • ${ift}`,
         description: dateLabel,
         ymd: row.date,
         timeHHMM: ift,
@@ -440,6 +440,13 @@ function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
    ========= */
 
 function init() {
+  // Clear old caches on update
+  const CACHE_VERSION = "v2";
+  const lastVersion = localStorage.getItem("appCacheVersion");
+  if (lastVersion !== CACHE_VERSION) {
+    localStorage.clear();
+    localStorage.setItem("appCacheVersion", CACHE_VERSION);
+  }
   el("printBtn").addEventListener("click", () => window.print());
 
   // ICS buttons
