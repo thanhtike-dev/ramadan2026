@@ -56,6 +56,30 @@ function applyRamadanStartOverride(days, year, lat, lon) {
   return filtered.slice(0, 30);
 }
 
+function addDaysToISO(iso, days) {
+  const [y, m, d] = iso.split("-").map(Number);
+  const dt = new Date(Date.UTC(y, m - 1, d));
+  dt.setUTCDate(dt.getUTCDate() + days);
+  const yy = dt.getUTCFullYear();
+  const mm = String(dt.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(dt.getUTCDate()).padStart(2, "0");
+  return `${yy}-${mm}-${dd}`;
+}
+
+function ensureThirtyDays(days) {
+  if (days.length >= 30) return days.slice(0, 30);
+  if (days.length === 29) {
+    const last = days[days.length - 1];
+    const extra = {
+      date: addDaysToISO(last.date, 1),
+      suhoorEnd: last.suhoorEnd,
+      iftar: last.iftar,
+    };
+    return [...days, extra];
+  }
+  return days;
+}
+
 function setText(id, value) {
   const node = document.getElementById(id);
   if (node) node.textContent = value;
@@ -132,6 +156,7 @@ async function fetchRamadanByLatLon({ year, lat, lon, tz, method = CALC_METHOD }
   // Sort, optionally align Day 1 to local calendar, then assign day numbers
   days.sort((a, b) => a.date.localeCompare(b.date));
   days = applyRamadanStartOverride(days, year, lat, lon);
+  days = ensureThirtyDays(days);
   days = days.map((x, i) => ({ day: i + 1, ...x }));
 
   localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data: days }));

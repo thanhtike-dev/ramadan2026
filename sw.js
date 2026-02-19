@@ -1,4 +1,4 @@
-const CACHE_NAME = "ramadan-mm-v16";
+const CACHE_NAME = "ramadan-mm-v17";
 
 const ASSETS = [
   "./",
@@ -20,7 +20,7 @@ self.addEventListener("install", (event) => {
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) =>
-      Promise.all(keys.map((k) => (k !== CACHE_NAME ? caches.delete(k) : null)))
+      Promise.all(keys.map((k) => caches.delete(k)))
     )
   );
   self.clients.claim();
