@@ -256,6 +256,16 @@ function renderTable() {
   });
 }
 
+function setTableStatus(message) {
+  const tbody = el("tbody");
+  if (!tbody) return;
+  tbody.innerHTML = `
+    <tr class="status-row">
+      <td colspan="4">${message}</td>
+    </tr>
+  `;
+}
+
 function findTodayRow() {
   const todayYMD = todayYMDinTZ(APP_TZ);
   return RAMADAN.find(r => r.date === todayYMD) || null;
@@ -268,14 +278,14 @@ function setTopCards() {
   const row = findTodayRow();
   if (!row) {
     el("dayLabel").textContent = "ယနေ့ရက်စွဲသည် ထည့်ထားသော ရမဇာန်ရက်စွဲများထဲတွင် မပါဝင်ပါ။";
-    el("suhoor").textContent = "—";
-    el("iftar").textContent = "—";
-    el("nextEvent").textContent = "—";
-    el("countdown").textContent = "—";
+    el("suhoor").textContent = "--:--";
+    el("iftar").textContent = "--:--";
+    el("nextEvent").textContent = "--:--";
+    el("countdown").textContent = "--:--";
     return;
   }
 
-  el("dayLabel").textContent = `ရမဇာန်နေ့ ${row.day} • ရက်စွဲ ${row.date}`;
+  el("dayLabel").textContent = `ရမဇာန်နေ့ ${row.day}`;
 
   const su = row.suhoorEnd;
   const ift = row.iftar;
@@ -289,16 +299,16 @@ function setTopCards() {
   let nextTime = null;
 
   if (now < suDate) {
-    nextName = "ဆူဟူးရ်ပြီးချိန်";
+    nextName = "၀ါပိတ်ရန်";
     nextTime = suDate;
   } else if (now < iftDate) {
-    nextName = "အီဖ်တာရ်";
+    nextName = "၀ါဖြေရန်";
     nextTime = iftDate;
   } else {
     const idx = RAMADAN.findIndex(r => r.date === row.date);
     const tomorrow = RAMADAN[idx + 1];
     if (tomorrow) {
-      nextName = "မနက်ဖြန် ဆူဟူးရ်ပြီးချိန်";
+      nextName = "မနက်ဖြန် ၀ါပိတ်ရန်";
       nextTime = makeLocalDate(tomorrow.date, tomorrow.suhoorEnd);
     } else {
       nextName = "—";
@@ -308,7 +318,7 @@ function setTopCards() {
   el("nextEvent").textContent = `${nextName}`;
 
   if (!nextTime) {
-    el("countdown").textContent = "—";
+    el("countdown").textContent = "--:--";
     return;
   }
 
@@ -318,7 +328,7 @@ function setTopCards() {
   const mm = Math.floor((s % 3600) / 60);
   const ss = s % 60;
 
-  el("countdown").textContent = `ကျန်ချိန် ${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
+  el("countdown").textContent = `${pad2(hh)}:${pad2(mm)}:${pad2(ss)}`;
 }
 
 /* =========================
@@ -388,7 +398,7 @@ function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
 
     if (includeSuhoor) {
       lines.push(buildEvent({
-        title: `ဆူဟူးရ်ပြီးချိန် • ${su}`,
+        title: `၀ါပိတ်ချိန် • ${su}`,
         description: dateLabel,
         ymd: row.date,
         timeHHMM: su,
@@ -399,7 +409,7 @@ function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
 
     if (includeIftar) {
       lines.push(buildEvent({
-        title: `အီဖ်တာရ် • ${ift}`,
+        title: `၀ါဖြေချိန် • ${ift}`,
         description: dateLabel,
         ymd: row.date,
         timeHHMM: ift,
@@ -462,6 +472,7 @@ function init() {
   const citySelect = document.getElementById("citySelect");
   const cityField = document.getElementById("cityField");
   const useLocationBtn = document.getElementById("useLocation");
+  const themeToggle = document.getElementById("themeToggle");
 
   // Hydrate saved location choice
   const savedLoc = loadLoc();
@@ -483,6 +494,32 @@ function init() {
     }
   }
 
+  function setTheme(theme) {
+    const root = document.documentElement;
+    root.setAttribute("data-theme", theme);
+    if (themeToggle) {
+      const isDark = theme === "dark";
+      themeToggle.setAttribute("aria-checked", isDark ? "true" : "false");
+    }
+  }
+
+  function initTheme() {
+    const saved = localStorage.getItem("theme");
+    if (saved === "light" || saved === "dark") {
+      setTheme(saved);
+      return;
+    }
+    const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+    setTheme(prefersDark ? "dark" : "light");
+  }
+
+  function toggleTheme() {
+    const current = document.documentElement.getAttribute("data-theme") || "dark";
+    const next = current === "dark" ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem("theme", next);
+  }
+
   function setUseLocationLoading(isLoading) {
     if (!useLocationBtn) return;
     if (!useLocationBtn.dataset.label) {
@@ -497,6 +534,7 @@ function init() {
   async function refreshDataAndRender() {
     const mode = locationMode?.value || "auto";
     const cityKey = citySelect?.value || "yangon";
+    const cityName = CITY_PRESETS[cityKey]?.name || "ရွေးထားသောမြို့";
 
     // Default: current Gregorian year (works for most use; you can add a year selector later)
     const year = new Date().getFullYear();
@@ -505,6 +543,11 @@ function init() {
     if (useLocationBtn) useLocationBtn.disabled = true;
     if (locationMode) locationMode.disabled = true;
     if (citySelect) citySelect.disabled = true;
+    if (mode === "city") {
+      setTableStatus(`${cityName} အတွက် ဒေတာ ရယူနေပါတယ်…`);
+    } else {
+      setTableStatus("လက်ရှိတည်နေရာအတွက် ဒေတာ ရယူနေပါတယ်…");
+    }
 
     try {
       await loadRamadanDataForMode({ mode, cityKey, year });
@@ -513,6 +556,7 @@ function init() {
       setTopCards();
     } catch (err) {
       console.error(err);
+      setTableStatus("ဒေတာ ရယူမရပါ။ ခဏနောက်ထပ်စမ်းကြည့်ပါ။");
       alert("Failed to load timetable for your location. Please check internet/GPS permissions and try again.");
     } finally {
       if (useLocationBtn) useLocationBtn.disabled = false;
@@ -543,6 +587,18 @@ function init() {
       }
     });
   }
+
+  if (themeToggle) {
+    themeToggle.addEventListener("click", toggleTheme);
+    themeToggle.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        toggleTheme();
+      }
+    });
+  }
+
+  initTheme();
 
   syncLocationUI();
 

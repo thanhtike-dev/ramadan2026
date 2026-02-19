@@ -21,10 +21,18 @@
   <header>
     <div class="wrap">
       <div class="topbar">
-        <div>
-          <div style="font-weight:900; font-size:20px;">ရမဇာန် အချိန်ဇယား</div>
-          <div class="muted">အချိန်ဇုန်: <span id="tzLabel">Auto</span></div>
-
+        <div class="topbar-wrap">
+          <div>
+            <div style="font-weight:900; font-size:20px;">ရမဇာန် အချိန်ဇယား</div>
+            <div class="muted">အချိန်ဇုန်: <span id="tzLabel">Auto</span></div>
+          </div>
+          <div class="theme-row">
+            <div class="theme-toggle" id="themeToggle" role="switch" aria-checked="false" tabindex="0" aria-label="Theme toggle">
+              <span class="theme-icon sun">☀️</span>
+              <span class="theme-icon moon">🌙</span>
+              <span class="theme-knob"></span>
+            </div>
+          </div>
         </div>
       </div>
     </div>
@@ -74,22 +82,23 @@
         <div class="muted">ယနေ့</div>
         <div id="todayLabel" class="big">—</div>
         <div style="margin-top:10px;" class="muted" id="dayLabel">—</div>
-        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap;">
-          <span class="badge" id="nextEvent">—</span>
-          <span class="badge" id="countdown">—</span>
+        <div style="margin-top:12px;">
+          <span class="muted" id="nextEvent">--:--</span>
+        </div>
+        <div style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; align-items: center;">
+          <span class="badge" id="countdown">--:--</span>
+          <span>မိနစ်အလို</span>
         </div>
       </div>
 
       <div class="card">
-        <div class="muted">ဆူဟူးရ်ပြီးချိန်</div>
-        <div class="big" id="suhoor">—</div>
-        <div class="muted">အများအားဖြင့် ဖဇ်ရ် အချိန်နှင့်တူသည်</div>
+        <div class="muted">၀ါပိတ်ချိန်</div>
+        <div class="big" id="suhoor">--:--</div>
       </div>
 
       <div class="card">
-        <div class="muted">အီဖ်တာရ်</div>
-        <div class="big" id="iftar">—</div>
-        <div class="muted">မာဂရစ်ဘ် အချိန်</div>
+        <div class="muted">၀ါဖြေချိန်</div>
+        <div class="big" id="iftar">--:--</div>
       </div>
     </div>
 
@@ -115,10 +124,10 @@
         <table>
           <thead>
             <tr>
-              <th>ရမဇာန်နေ့</th>
+              <th>ရိုဇာ</th>
               <th>ရက်စွဲ</th>
-              <th>ဆူဟူးရ်ပြီးချိန်</th>
-              <th>အီဖ်တာရ်</th>
+              <th>၀ါပိတ်ချိန်</th>
+              <th>၀ါဖြေချိန်</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -135,7 +144,7 @@
       <div id="iosInstallHint" class="muted" style="margin-top:8px; display:none;">
         iPhone/iPad: Safari မှာ ဖွင့်ပြီး <b>Share</b> → <b>Add to Home Screen</b> နဲ့ Install လုပ်နိုင်ပါတယ်။
       </div>
-      <div>မှတ်ချက် — တည်နေရာ (lat/lon) အလိုက် အချိန်များကွာခြားပါသည်။ GPS သုံးမရပါက မြို့ရွေးပါ။</div>
+      <div class="footer-copy">Developed by Than Htike, viber: +959760337750</div>
     </div>
   </main>
 
