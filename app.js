@@ -38,7 +38,7 @@ const LOC_KEY = "ramadan_loc_v1";
 // Optional: force Ramadan Day 1 to start from a specific Gregorian date for Myanmar.
 // Useful when local moon-sighting differs by 1 day from calculated Hijri conversion.
 const RAMADAN_START_OVERRIDES_MYANMAR_BY_YEAR = {
-  2026: "2026-02-19",
+  2026: "2026-02-20",
 };
 
 function isInMyanmar(lat, lon) {
@@ -90,10 +90,6 @@ function stripTz(timeStr) {
   return (timeStr || "").split(" ")[0].trim();
 }
 
-function cacheKey({ year, lat, lon, tz, method }) {
-  return `ramadan_cache_v7_${year}_${lat.toFixed(4)}_${lon.toFixed(4)}_${tz}_${method}`;
-}
-
 async function fetchCalendarMonth({ year, month, lat, lon, tz, method }) {
   const url = new URL(`${ALADHAN_BASE}/calendar`);
   url.searchParams.set("latitude", String(lat));
@@ -114,18 +110,6 @@ async function fetchCalendarMonth({ year, month, lat, lon, tz, method }) {
 async function fetchRamadanByLatLon({ year, lat, lon, tz, method = CALC_METHOD }) {
   // Ramadan can span across Gregorian months; fetch a safe set then filter Hijri month=9.
   const monthsToTry = [12, 1, 2, 3, 4, 5];
-  const key = cacheKey({ year, lat, lon, tz, method });
-
-  // Cache for 7 days
-  const cached = localStorage.getItem(key);
-  if (cached) {
-    try {
-      const parsed = JSON.parse(cached);
-      if (parsed?.savedAt && (Date.now() - parsed.savedAt) < 7 * 24 * 60 * 60 * 1000) {
-        return parsed.data;
-      }
-    } catch {}
-  }
 
   let days = [];
 
@@ -158,8 +142,6 @@ async function fetchRamadanByLatLon({ year, lat, lon, tz, method = CALC_METHOD }
   days = applyRamadanStartOverride(days, year, lat, lon);
   days = ensureThirtyDays(days);
   days = days.map((x, i) => ({ day: i + 1, ...x }));
-
-  localStorage.setItem(key, JSON.stringify({ savedAt: Date.now(), data: days }));
   return days;
 }
 
@@ -475,19 +457,19 @@ function downloadICS({ includeSuhoor, includeIftar, alarmMinutes = 10 }) {
    ========= */
 
 function init() {
-  // Clear old caches on update
-  const CACHE_VERSION = "v4";
-  const lastVersion = localStorage.getItem("appCacheVersion");
-  if (lastVersion !== CACHE_VERSION) {
-    localStorage.clear();
-    localStorage.setItem("appCacheVersion", CACHE_VERSION);
-  }
+  const trackEvent = (...args) => {
+    if (typeof window.gtag === "function") {
+      window.gtag(...args);
+    }
+  };
+
   // ICS buttons
   const icsBtn = document.getElementById("icsBtn");
   const icsBothBtn = document.getElementById("icsBothBtn");
 
   if (icsBtn) {
     icsBtn.addEventListener("click", () => {
+      trackEvent("event", "calendar_export_click", { type: "iftar_only" });
       // 10 minutes before by default
       downloadICS({ includeIftar: true, includeSuhoor: false, alarmMinutes: 10 });
     });
@@ -495,6 +477,7 @@ function init() {
 
   if (icsBothBtn) {
     icsBothBtn.addEventListener("click", () => {
+      trackEvent("event", "calendar_export_click", { type: "iftar_and_suhoor" });
       downloadICS({ includeIftar: true, includeSuhoor: true, alarmMinutes: 10 });
     });
   }
@@ -619,6 +602,7 @@ function init() {
   if (citySelect) citySelect.addEventListener("change", refreshDataAndRender);
   if (useLocationBtn) {
     useLocationBtn.addEventListener("click", async () => {
+      trackEvent("event", "use_location_click");
       setUseLocationLoading(true);
       try {
         await refreshDataAndRender();

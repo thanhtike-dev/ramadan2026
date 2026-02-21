@@ -441,6 +441,16 @@ button:focus-visible {
   text-align: center;
   font-size: 14px;
   margin-top: 20px;
+  padding: 14px 16px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--panel2) 55%, transparent);
+  line-height: 1.8;
+}
+
+.footer-copy strong {
+  font-size: 15px;
+  color: var(--text);
 }
 
 @media (max-width: 720px) {
